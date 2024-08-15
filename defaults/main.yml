@@ -1,0 +1,46 @@
+---
+argocd_admin_pass: ""
+argocd_annotations: {}
+argocd_annotations_pod: {}
+argocd_enable_dex: false
+argocd_enable_notification: true
+argocd_enable_applicationSet: true
+argocd_env: []
+argocd_fqdn: "argocd.example.com"
+argocd_ha: false
+argocd_https: false
+argocd_labels: {}
+argocd_labels_pod: {}
+argocd_logging_format: text    # Either: `text` or `json`
+argocd_logging_level: info    # One of: `debug`, `info`, `warn` or `error`
+argocd_name: argocd
+argocd_namespace: argocd
+argocd_prometheus: false
+argocd_repositories: {}
+  # istio-helm-repo:
+  #   url: https://storage.googleapis.com/istio-prerelease/daily-build/master-latest-daily/charts
+  #   name: istio.io
+  #   type: helm
+  # private-helm-repo:
+  #   url: https://my-private-chart-repo.internal
+  #   name: private-repo
+  #   type: helm
+  #   password: my-password
+  #   username: my-username
+argocd_salt: "{{ ansible_machine_id[0:21] + '.' }}"
+argocd_secret_extra: {}
+  # LDAP_PASSWORD: "mypassword"
+argocd_secret_webhook_azure_pass: ""
+argocd_secret_webhook_azure_user: ""
+argocd_secret_webhook_github: ""
+argocd_secret_webhook_gitlab: ""
+argocd_ui_loadbalancer: false
+argocd_ui_traefik: false
+argocd_version: 6.7.17
+chart_ref: argo/argo-cd
+chart_repository_name: argo
+helm_repo_pass: "{{ undef() }}"
+helm_repo_url: https://argoproj.github.io/argo-helm
+helm_repo_user: "{{ undef() }}"
+k8s_config: "{{ lookup('ansible.builtin.env', 'K8S_AUTH_KUBECONFIG', default=undef()) }}"
+k8s_context: "{{ lookup('ansible.builtin.env', 'K8S_AUTH_CONTEXT', default=undef()) }}"

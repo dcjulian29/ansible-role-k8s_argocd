@@ -1,0 +1,81 @@
+---
+- name: Create Kubernetes namespace
+  kubernetes.core.k8s:
+    api_version: v1
+    context: "{{ k8s_context | default(omit) }}"
+    kind: namespace
+    kubeconfig: "{{ k8s_config | default(omit) }}"
+    name: "{{ argocd_namespace }}"
+    state: present
+
+- name: Add helm repository
+  kubernetes.core.helm_repository:
+    context: "{{ k8s_context | default(omit) }}"
+    kubeconfig: "{{ k8s_config | default(omit) }}"
+    name: "{{ chart_repository_name }}"
+    password: "{{ helm_repo_pass | default(omit) }}"
+    state: present
+    url: "{{ helm_repo_url }}"
+    username: "{{ helm_repo_user | default(omit) }}"
+
+- name: Deploy ArgoCD to cluster using chart
+  kubernetes.core.helm:
+    chart_ref: "{{ chart_ref }}"
+    chart_version: "v{{ argocd_version }}"
+    context: "{{ k8s_context | default(omit) }}"
+    kubeconfig: "{{ k8s_config | default(omit) }}"
+    name: "{{ argocd_name }}"
+    namespace: "{{ k8s_namespace }}"
+    update_repo_cache: true
+    values: "{{ lookup('template', 'values.yaml.j2') | from_yaml }}"
+    wait: true
+
+- name: Patch WebUI service to ensure it is available from outside cluster
+  kubernetes.core.k8s_json_patch:
+    context: "{{ k8s_context | default(omit) }}"
+    kind: svc
+    kubeconfig: "{{ k8s_config | default(omit) }}"
+    namespace: "{{ k8s_namespace }}"
+    name: argocd-server
+    patch:
+      - op: replace
+        path: /spec/type
+        value: LoadBalancer
+  when: argocd_ui_loadbalancer
+
+- name: Ensure traefik is configured to serve UI
+  kubernetes.core.k8s:
+    context: "{{ k8s_context | default(omit) }}"
+    definition:
+      apiVersion: traefik.containo.us/v1alpha1
+      kind: IngressRoute
+      metadata:
+        name: argocd-server
+        namespace: "{{ k8s_namespace }}"
+        annotations:
+          kubernetes.io/ingress.class: traefik-external
+      spec:
+        entryPoints:
+          - websecure
+        routes:
+          - kind: Rule
+            match: "Host(`{{ argocd_fqdn }}`)"
+            priority: 10
+            services:
+              - name: argocd-server
+                port: 80
+          - kind: Rule
+            match: "Host(`{{ argocd_fqdn }}`) && Headers(`Content-Type`, `application/grpc`)"
+            priority: 11
+            services:
+              - name: argocd-server
+                port: 80
+                scheme: h2c
+        chain:
+          middlewares:
+            - name: default-default@kubernetescrd
+        tls:
+          certResolver: default
+    kubeconfig: "{{ k8s_config | default(omit) }}"
+    state: present
+  when: argocd_ui_traefik

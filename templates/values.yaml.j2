@@ -1,0 +1,32 @@
+---
+configs:
+  params:
+    server.insecure: {{ argocd_https }}
+  repositories: {{ argocd_repositories }}
+  secret:
+    argocdServerAdminPassword: {{ "" if argocd_admin_pass | length == 0 else argocd_admin_pass | password_hash('bcrypt', argocd_salt) }}
+    azureDevops:
+      username: {{ argocd_secret_webhook_azure_user }}
+      password: {{ argocd_secret_webhook_azure_pass }}
+    extra: {{ argocd_secret_extra }}
+    githubSecret: {{ argocd_secret_webhook_github }}
+    gitlabSecret: {{ argocd_secret_webhook_gitlab }}
+dex:
+  enabled: {{ argocd_enable_dex }}
+global:
+  additionalLabels: {{ argocd_labels }}
+  addPrometheusAnnotations: {{ argocd_prometheus | to_json }}
+  domain: {{ argocd_fqdn }}
+  env: {{ argocd_env }}
+  logging:
+    format: {{ argocd_logging_format }}
+    level: {{ argocd_logging_level }}
+  podAnnotations: {{ argocd_annotations_pod }}
+  podLabels: {{ argocd_labels_pod }}
+notifications:
+  enabled: {{ argocd_enable_notification }}
+applicationSet:
+  enabled: {{ argocd_enable_applicationSet }}
+#  server:
+#    extraArgs:
+#      - --insecure
