@@ -25,7 +25,7 @@
     context: "{{ k8s_context | default(omit) }}"
     kubeconfig: "{{ k8s_config | default(omit) }}"
     name: "{{ argocd_name }}"
-    namespace: "{{ k8s_namespace }}"
+    namespace: "{{ argocd_namespace }}"
     update_repo_cache: true
     values: "{{ lookup('template', 'values.yaml.j2') | from_yaml }}"
     wait: true
@@ -35,13 +35,16 @@
     context: "{{ k8s_context | default(omit) }}"
     kind: svc
     kubeconfig: "{{ k8s_config | default(omit) }}"
-    namespace: "{{ k8s_namespace }}"
+    namespace: "{{ argocd_namespace }}"
     name: argocd-server
     patch:
       - op: replace
         path: /spec/type
         value: LoadBalancer
-  when: argocd_ui_loadbalancer
+  when:
+    - argocd_ui_loadbalancer
+    - not argocd_ui_traefik
+
 
 - name: Ensure traefik is configured to serve UI
   kubernetes.core.k8s:
@@ -51,7 +54,7 @@
       kind: IngressRoute
       metadata:
         name: argocd-server
-        namespace: "{{ k8s_namespace }}"
+        namespace: "{{ argocd_namespace }}"
         annotations:
           kubernetes.io/ingress.class: traefik-external
       spec:
@@ -78,4 +81,6 @@
           certResolver: default
     kubeconfig: "{{ k8s_config | default(omit) }}"
     state: present
-  when: argocd_ui_traefik
+  when:
+    - argocd_ui_traefik
+    - not argocd_ui_loadbalancer
