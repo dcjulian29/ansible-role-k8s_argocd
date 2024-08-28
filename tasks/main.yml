@@ -30,27 +30,11 @@
     values: "{{ lookup('template', 'values.yaml.j2') | from_yaml }}"
     wait: true
 
-- name: Patch WebUI service to ensure it is available from outside cluster
-  kubernetes.core.k8s_json_patch:
-    context: "{{ k8s_context | default(omit) }}"
-    kind: svc
-    kubeconfig: "{{ k8s_config | default(omit) }}"
-    namespace: "{{ argocd_namespace }}"
-    name: argocd-server
-    patch:
-      - op: replace
-        path: /spec/type
-        value: LoadBalancer
-  when:
-    - argocd_ui_loadbalancer
-    - not argocd_ui_traefik
-
-
 - name: Ensure traefik is configured to serve UI
   kubernetes.core.k8s:
     context: "{{ k8s_context | default(omit) }}"
     definition:
-      apiVersion: traefik.containo.us/v1alpha1
+      apiVersion: traefik.io/v1alpha1
       kind: IngressRoute
       metadata:
         name: argocd-server
@@ -68,7 +52,7 @@
               - name: argocd-server
                 port: 80
           - kind: Rule
-            match: "Host(`{{ argocd_fqdn }}`) && Headers(`Content-Type`, `application/grpc`)"
+            match: "Host(`{{ argocd_fqdn }}`) && Header(`Content-Type`, `application/grpc`)"
             priority: 11
             services:
               - name: argocd-server
@@ -77,10 +61,6 @@
         chain:
           middlewares:
             - name: default-default@kubernetescrd
-        tls:
-          certResolver: default
     kubeconfig: "{{ k8s_config | default(omit) }}"
     state: present
-  when:
-    - argocd_ui_traefik
-    - not argocd_ui_loadbalancer
+  when: argocd_ui_expose

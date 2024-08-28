@@ -1,7 +1,7 @@
 ---
 configs:
   params:
-    server.insecure: {{ argocd_https }}
+    server.insecure: {{ 'true' if argocd_ui_traefik else argocd_https }}
   repositories: {{ argocd_repositories }}
   secret:
     argocdServerAdminPassword: {{ "" if argocd_admin_pass | length == 0 else argocd_admin_pass | password_hash('bcrypt', argocd_salt) }}
@@ -27,6 +27,3 @@ notifications:
   enabled: {{ argocd_enable_notification }}
 applicationSet:
   enabled: {{ argocd_enable_applicationSet }}
-#  server:
-#    extraArgs:
-#      - --insecure
