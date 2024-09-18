@@ -2,12 +2,19 @@
 argocd_admin_pass: ""
 argocd_annotations: {}
 argocd_annotations_pod: {}
+argocd_certmanager_enable: false
+argocd_certmanager_secret: argocd-ui-secret
+argocd_chart_ref: argo/argo-cd
+argocd_chart_repository_name: argo
 argocd_enable_dex: false
 argocd_enable_notification: true
 argocd_enable_applicationSet: true
 argocd_env: []
 argocd_fqdn: "argocd.example.com"
 argocd_ha: false
+argocd_helm_repo_pass: "{{ undef() }}"
+argocd_helm_repo_url: https://argoproj.github.io/argo-helm
+argocd_helm_repo_user: "{{ undef() }}"
 argocd_https: false
 argocd_labels: {}
 argocd_labels_pod: {}
@@ -36,10 +43,5 @@ argocd_secret_webhook_github: ""
 argocd_secret_webhook_gitlab: ""
 argocd_ui_expose: false
 argocd_version: 6.7.17
-chart_ref: argo/argo-cd
-chart_repository_name: argo
-helm_repo_pass: "{{ undef() }}"
-helm_repo_url: https://argoproj.github.io/argo-helm
-helm_repo_user: "{{ undef() }}"
 k8s_config: "{{ lookup('ansible.builtin.env', 'K8S_AUTH_KUBECONFIG', default=undef()) }}"
 k8s_context: "{{ lookup('ansible.builtin.env', 'K8S_AUTH_CONTEXT', default=undef()) }}"

@@ -12,15 +12,15 @@
   kubernetes.core.helm_repository:
     context: "{{ k8s_context | default(omit) }}"
     kubeconfig: "{{ k8s_config | default(omit) }}"
-    name: "{{ chart_repository_name }}"
-    password: "{{ helm_repo_pass | default(omit) }}"
+    name: "{{ argocd_chart_repository_name }}"
+    password: "{{ argocd_helm_repo_pass | default(omit) }}"
     state: present
-    url: "{{ helm_repo_url }}"
-    username: "{{ helm_repo_user | default(omit) }}"
+    url: "{{ argocd_helm_repo_url }}"
+    username: "{{ argocd_helm_repo_user | default(omit) }}"
 
 - name: Deploy ArgoCD to cluster using chart
   kubernetes.core.helm:
-    chart_ref: "{{ chart_ref }}"
+    chart_ref: "{{ argocd_chart_ref }}"
     chart_version: "v{{ argocd_version }}"
     context: "{{ k8s_context | default(omit) }}"
     kubeconfig: "{{ k8s_config | default(omit) }}"
