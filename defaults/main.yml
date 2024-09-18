@@ -16,6 +16,7 @@ argocd_helm_repo_pass: "{{ undef() }}"
 argocd_helm_repo_url: https://argoproj.github.io/argo-helm
 argocd_helm_repo_user: "{{ undef() }}"
 argocd_https: false
+argocd_ingress_class: traefik
 argocd_labels: {}
 argocd_labels_pod: {}
 argocd_logging_format: text    # Either: `text` or `json`

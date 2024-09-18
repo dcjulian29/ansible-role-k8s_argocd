@@ -33,34 +33,7 @@
 - name: Ensure traefik is configured to serve UI
   kubernetes.core.k8s:
     context: "{{ k8s_context | default(omit) }}"
-    definition:
-      apiVersion: traefik.io/v1alpha1
-      kind: IngressRoute
-      metadata:
-        name: argocd-server
-        namespace: "{{ argocd_namespace }}"
-        annotations:
-          kubernetes.io/ingress.class: traefik-external
-      spec:
-        entryPoints:
-          - websecure
-        routes:
-          - kind: Rule
-            match: "Host(`{{ argocd_fqdn }}`)"
-            priority: 10
-            services:
-              - name: argocd-server
-                port: 80
-          - kind: Rule
-            match: "Host(`{{ argocd_fqdn }}`) && Header(`Content-Type`, `application/grpc`)"
-            priority: 11
-            services:
-              - name: argocd-server
-                port: 80
-                scheme: h2c
-        chain:
-          middlewares:
-            - name: default-default@kubernetescrd
+    definition: "{{ lookup('template', 'ingress.yaml.j2') | from_yaml }}"
     kubeconfig: "{{ k8s_config | default(omit) }}"
     state: present
   when: argocd_ui_expose
