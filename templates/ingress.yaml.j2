@@ -20,7 +20,7 @@ spec:
       match: "Host(`{{ argocd_fqdn }}`) && Header(`Content-Type`, `application/grpc`)"
       priority: 11
       services:
-        - name: argocd-server
+        - name: argocd-server@kubernetescrd
           port: 80
           scheme: h2c
   chain:
